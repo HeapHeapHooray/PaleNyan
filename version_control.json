@@ -1,0 +1,9 @@
+[
+  {"source": "papermc", "name": "PaperMC", "version": "1.21.11", "build": "69"},
+  {"source": "modrinth", "project": "luckperms", "name": "LuckPerms-Bukkit", "version": "v5.5.17-bukkit"},
+  {"source": "modrinth", "project": "worldedit", "name": "worldedit-bukkit", "version": "7.4.3"},
+  {"source": "modrinth", "project": "worldguard", "name": "worldguard-bukkit", "version": "7.0.16"},
+  {"source": "modrinth", "project": "multiverse-core", "name": "multiverse-core", "version": "5.7.0-pre"},
+  {"source": "github", "repo": "Tantrum90/MuseumWorld", "name": "MuseumWorld", "version": "v1.1.0"},
+  {"source": "github", "repo": "mattgd/StartupCommands", "name": "StartupCommands", "version": "v0.0.6"}
+]
