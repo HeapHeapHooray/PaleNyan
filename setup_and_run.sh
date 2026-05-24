@@ -317,9 +317,9 @@ EOF
 cat << 'EOF' > "$SERVER_DIR/plugins/LuckPerms/yaml-storage/groups/default.yml"
 name: default
 permissions:
-  - 'worldedit.navigation.ascend':
+  - 'worldedit.navigation.*':
       value: true
-  - 'worldedit.navigation.descend':
+  - 'worldedit.selection.*':
       value: true
   - 'worldguard.region.info':
       value: true
@@ -368,6 +368,7 @@ regions:
         priority: 0
         flags:
             passthrough: deny
+            build: deny             # Blocks ALL block edits, including WorldEdit
             use: allow              # Allowed so players can open doors/gates (MuseumWorld blocks levers/buttons)
             chest-access: allow     # Allowed so players can VIEW contents (Plugin will block EDITS)
             redstone: deny          # COMPLETELY disables all redstone activity/clocks/updates
