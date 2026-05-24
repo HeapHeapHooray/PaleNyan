@@ -180,6 +180,7 @@ else
     download_modrinth "multiverse-core" "multiverse-core"
     download_github "Tantrum90/MuseumWorld" "MuseumWorld"
     download_github "mattgd/StartupCommands" "StartupCommands"
+    download_modrinth "P1OZGk5p" "ViaVersion"
 
     LP_VER=$(curl -s "https://api.modrinth.com/v2/project/luckperms/version" | jq -r '[.[] | select(.loaders | index("bukkit") or index("paper"))][0].version_number')
     WE_VER=$(curl -s "https://api.modrinth.com/v2/project/worldedit/version" | jq -r '[.[] | select(.loaders | index("bukkit") or index("paper"))][0].version_number')
@@ -187,6 +188,7 @@ else
     MV_VER=$(curl -s "https://api.modrinth.com/v2/project/multiverse-core/version" | jq -r '[.[] | select(.loaders | index("bukkit") or index("paper"))][0].version_number')
     MW_VER=$(curl -s "https://api.github.com/repos/Tantrum90/MuseumWorld/releases/latest" | jq -r '.tag_name')
     SC_VER=$(curl -s "https://api.github.com/repos/mattgd/StartupCommands/releases/latest" | jq -r '.tag_name')
+    VV_VER=$(curl -s "https://api.modrinth.com/v2/project/P1OZGk5p/version" | jq -r '[.[] | select(.loaders | index("paper"))][0].version_number')
 
     cat << EOF > "$PLUGIN_MANIFEST"
 [
@@ -196,7 +198,8 @@ else
   {"source": "modrinth", "project": "worldguard", "name": "worldguard-bukkit", "version": "$WG_VER"},
   {"source": "modrinth", "project": "multiverse-core", "name": "multiverse-core", "version": "$MV_VER"},
   {"source": "github", "repo": "Tantrum90/MuseumWorld", "name": "MuseumWorld", "version": "$MW_VER"},
-  {"source": "github", "repo": "mattgd/StartupCommands", "name": "StartupCommands", "version": "$SC_VER"}
+  {"source": "github", "repo": "mattgd/StartupCommands", "name": "StartupCommands", "version": "$SC_VER"},
+  {"source": "modrinth", "project": "P1OZGk5p", "name": "ViaVersion", "version": "$VV_VER"}
 ]
 EOF
     echo "$PLUGIN_MANIFEST generated with pinned versions."
