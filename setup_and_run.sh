@@ -335,13 +335,21 @@ view-distance=$MAX_DRAW_DISTANCE
 simulation-distance=$MAX_DRAW_DISTANCE
 EOF
 
-# commands.yml (/spawn → /mvtp to main world)
+# commands.yml (/spawn → /mvtp to main world, and self-only tp / teleport overrides)
 cat << EOF > "$SERVER_DIR/commands.yml"
 command-block-overrides: []
 ignore-vanilla-permissions: false
 aliases:
   spawn:
   - mvtp $MAIN_WORLD
+  tp:
+  - minecraft:teleport @s \$1-
+  teleport:
+  - minecraft:teleport @s \$1-
+  minecraft:tp:
+  - minecraft:teleport @s \$1-
+  minecraft:teleport:
+  - minecraft:teleport @s \$1-
 EOF
 
 # bukkit.yml (Disable global autosave)
@@ -971,6 +979,8 @@ rm -rf plugins/.paper-remapped
 
 # Start server
 java -Xms"$MIN_RAM" -Xmx"$MAX_RAM" -XX:+UseG1GC \
+ -XX:ParallelGCThreads=1 \
+ -XX:ConcGCThreads=1 \
  -XX:+ParallelRefProcEnabled \
  -XX:MaxGCPauseMillis=200 \
  -XX:+UnlockExperimentalVMOptions \
