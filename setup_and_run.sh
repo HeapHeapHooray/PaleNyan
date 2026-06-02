@@ -13,41 +13,6 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-# Default IP and Port values
-IP_LISTEN=""
-PORT_LISTEN="25565"
-
-# Allow overriding via environment variables
-if [ -n "$SERVER_IP" ]; then
-    IP_LISTEN="$SERVER_IP"
-fi
-if [ -n "$SERVER_PORT" ]; then
-    PORT_LISTEN="$SERVER_PORT"
-fi
-
-# Parse command line arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -i|--ip)
-            IP_LISTEN="$2"
-            shift 2
-            ;;
-        -p|--port)
-            PORT_LISTEN="$2"
-            shift 2
-            ;;
-        *)
-            echo "Unknown option: $1"
-            echo "Usage: $0 [-i|--ip <ip>] [-p|--port <port>]"
-            exit 1
-            ;;
-    esac
-done
-
-echo "=========================================================="
-echo " Configured to listen on IP: '${IP_LISTEN:-all}' and Port: '${PORT_LISTEN}'"
-echo "=========================================================="
-
 # Server Root Directory
 SERVER_DIR="./server-instance"
 rm -rf "$SERVER_DIR"
@@ -285,12 +250,9 @@ for w in "${DETECTED_WORLDS[@]}"; do
         break
     fi
 done
-echo "Seeding server.properties (level-name=$MAIN_WORLD, ip=${IP_LISTEN:-all}, port=$PORT_LISTEN)..."
+echo "Seeding server.properties (level-name=$MAIN_WORLD)..."
 cat << EOF > "$SERVER_DIR/server.properties"
 # Minecraft server properties
-server-ip=$IP_LISTEN
-server-port=$PORT_LISTEN
-query.port=$PORT_LISTEN
 level-name=$MAIN_WORLD
 spawn-protection=0
 allow-flight=true
@@ -416,8 +378,6 @@ regions:
             pistons: deny           # Completely disables pistons extending/retracting
             damage-animals: deny
             pvp: deny
-            item-drop: deny
-            item-pickup: deny
             entity-item-frame-destroy: deny
             entity-painting-destroy: deny
             mob-spawning: deny      # Blocks all natural/structure/spawner spawning
