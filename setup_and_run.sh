@@ -890,8 +890,7 @@ cd "$SERVER_DIR"
 rm -rf plugins/.paper-remapped
 
 # Start server
-java -Xms4G -Xmx4G \
- -XX:+UseG1GC \
+java -XX:+UseG1GC \
  -XX:+ParallelRefProcEnabled \
  -XX:MaxGCPauseMillis=200 \
  -XX:+UnlockExperimentalVMOptions \
