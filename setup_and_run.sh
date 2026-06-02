@@ -107,6 +107,36 @@ download_github() {
     fi
 }
 
+download_geysermc() {
+    local project_id=$1
+    local name=$2
+    local version=${3:-latest}
+
+    # Fetch project versions
+    local proj_data=$(curl -s "https://download.geysermc.org/v2/projects/$project_id")
+    if [ "$version" = "latest" ] || [ -z "$version" ] || [ "$version" = "null" ]; then
+        version=$(echo "$proj_data" | jq -r '.versions[-1] // ""')
+    fi
+
+    # Fetch builds for version
+    local ver_data=$(curl -s "https://download.geysermc.org/v2/projects/$project_id/versions/$version")
+    local latest_build=$(echo "$ver_data" | jq '.builds[-1]')
+
+    # Fetch download info
+    local build_data=$(curl -s "https://download.geysermc.org/v2/projects/$project_id/versions/$version/builds/$latest_build")
+    local filename=$(echo "$build_data" | jq -r '.downloads.spigot.name // ""')
+
+    if [ -f "$SERVER_DIR/plugins/$filename" ]; then
+        echo "$name is already installed ($filename)."
+    elif [ -n "$filename" ] && [ "$filename" != "null" ]; then
+        echo "Downloading $name ($filename) from GeyserMC API..."
+        wget -q -O "$SERVER_DIR/plugins/$filename" "https://download.geysermc.org/v2/projects/$project_id/versions/$version/builds/$latest_build/downloads/spigot"
+        echo "Downloaded $name."
+    else
+        echo "Failed to fetch GeyserMC download info for $name"
+    fi
+}
+
 # Determine PaperMC version/build from manifest or latest
 fetch_papermc_info() {
     local ver_override=$1
@@ -157,6 +187,9 @@ if [ -f "$PLUGIN_MANIFEST" ]; then
         elif [ "$source" = "github" ]; then
             repo=$(jq -r ".[$i].repo" "$PLUGIN_MANIFEST")
             download_github "$repo" "$name" "$version"
+        elif [ "$source" = "geysermc" ]; then
+            project=$(jq -r ".[$i].project" "$PLUGIN_MANIFEST")
+            download_geysermc "$project" "$name" "$version"
         else
             echo "Unknown source '$source' for $name, skipping."
         fi
@@ -181,6 +214,8 @@ else
     download_github "Tantrum90/MuseumWorld" "MuseumWorld"
     download_github "mattgd/StartupCommands" "StartupCommands"
     download_modrinth "P1OZGk5p" "ViaVersion"
+    download_geysermc "geyser" "Geyser-Spigot"
+    download_geysermc "floodgate" "Floodgate"
 
     LP_VER=$(curl -s "https://api.modrinth.com/v2/project/luckperms/version" | jq -r '[.[] | select(.loaders | index("bukkit") or index("paper"))][0].version_number')
     WE_VER=$(curl -s "https://api.modrinth.com/v2/project/worldedit/version" | jq -r '[.[] | select(.loaders | index("bukkit") or index("paper"))][0].version_number')
@@ -189,6 +224,8 @@ else
     MW_VER=$(curl -s "https://api.github.com/repos/Tantrum90/MuseumWorld/releases/latest" | jq -r '.tag_name')
     SC_VER=$(curl -s "https://api.github.com/repos/mattgd/StartupCommands/releases/latest" | jq -r '.tag_name')
     VV_VER=$(curl -s "https://api.modrinth.com/v2/project/P1OZGk5p/version" | jq -r '[.[] | select(.loaders | index("paper"))][0].version_number')
+    GEYSER_VER=$(curl -s "https://download.geysermc.org/v2/projects/geyser" | jq -r '.versions[-1]')
+    FLOODGATE_VER=$(curl -s "https://download.geysermc.org/v2/projects/floodgate" | jq -r '.versions[-1]')
 
     cat << EOF > "$PLUGIN_MANIFEST"
 [
@@ -199,7 +236,9 @@ else
   {"source": "modrinth", "project": "multiverse-core", "name": "multiverse-core", "version": "$MV_VER"},
   {"source": "github", "repo": "Tantrum90/MuseumWorld", "name": "MuseumWorld", "version": "$MW_VER"},
   {"source": "github", "repo": "mattgd/StartupCommands", "name": "StartupCommands", "version": "$SC_VER"},
-  {"source": "modrinth", "project": "P1OZGk5p", "name": "ViaVersion", "version": "$VV_VER"}
+  {"source": "modrinth", "project": "P1OZGk5p", "name": "ViaVersion", "version": "$VV_VER"},
+  {"source": "geysermc", "project": "geyser", "name": "Geyser-Spigot", "version": "$GEYSER_VER"},
+  {"source": "geysermc", "project": "floodgate", "name": "Floodgate", "version": "$FLOODGATE_VER"}
 ]
 EOF
     echo "$PLUGIN_MANIFEST generated with pinned versions."
@@ -344,6 +383,21 @@ permissions:
       value: true
   - 'minecraft.command.gamemode':
       value: true
+EOF
+
+# ------------------------------------------------------------------------------
+# 2.5 GeyserMC and Floodgate Configs (Bedrock Support)
+# ------------------------------------------------------------------------------
+echo "Seeding GeyserMC configuration..."
+mkdir -p "$SERVER_DIR/plugins/Geyser-Spigot"
+cat << 'EOF' > "$SERVER_DIR/plugins/Geyser-Spigot/config.yml"
+# GeyserMC Configuration (Minimal/Auto-Merging)
+bedrock:
+  address: 0.0.0.0
+  port: 19132
+remote:
+  address: auto
+  auth-type: floodgate
 EOF
 
 # ------------------------------------------------------------------------------

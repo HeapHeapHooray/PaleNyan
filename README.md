@@ -8,7 +8,7 @@ A PaperMC server automator that builds a fresh, locked-down read-only Minecraft 
 2. Wipes `./server-instance/` and rebuilds it from scratch
 3. Copies worlds from `./worlds/` and a server icon from `./server-icon.png`
 4. Downloads PaperMC + plugins (versions pinned in `version_control.json`)
-5. Generates all config files — WorldGuard, LuckPerms, Multiverse-Core, MuseumWorld, StartupCommands
+5. Generates all config files — WorldGuard, LuckPerms, Multiverse-Core, MuseumWorld, StartupCommands, Geyser-Spigot
 6. Starts the server with Aikar's flags
 
 ## Version pinning
@@ -33,6 +33,7 @@ All server behavior is configured through the script — no manual editing of se
 - **Multiverse** — Worlds auto-imported on boot, gamemode forced to creative
 - **Autosave disabled** — `save-off` after startup, `ticks-per.autosave: 0`
 - **Spawn** — `/spawn` aliased to `/mvtp <main-world>`
+- **Bedrock Edition Cross-Play** — Integrates GeyserMC and Floodgate to allow Minecraft Bedrock players to join on UDP port `19132` without requiring a paid Java Edition account.
 
 ## Directory structure
 
