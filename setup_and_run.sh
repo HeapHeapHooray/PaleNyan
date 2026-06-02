@@ -307,6 +307,7 @@ allow-end=false
 spawn-animals=false
 spawn-monsters=false
 spawn-npcs=false
+enforce-secure-profile=false
 EOF
 
 # commands.yml (/spawn → /mvtp to main world)
@@ -960,4 +961,5 @@ java -XX:+UseG1GC \
  -XX:MaxTenuringThreshold=1 \
  -Dusing.aikars.flags=https://mcflags.emc.gs \
  -Daikars.new.flags=true \
+ -DGeyser.PrintSecureChatInformation=false \
  -jar "$JAR_NAME" nogui
