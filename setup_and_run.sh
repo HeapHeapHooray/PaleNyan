@@ -13,6 +13,29 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# ------------------------------------------------------------------------------
+# 0. Load User Configuration (config.json)
+# ------------------------------------------------------------------------------
+CONFIG_FILE="config.json"
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Creating default $CONFIG_FILE..."
+    cat << 'EOF' > "$CONFIG_FILE"
+{
+  "minimum_ram": "2G",
+  "maximum_ram": "4G",
+  "maximum_draw_distance": 10
+}
+EOF
+fi
+
+echo "Reading user configuration from $CONFIG_FILE..."
+MIN_RAM=$(jq -r '.minimum_ram // "2G"' "$CONFIG_FILE")
+MAX_RAM=$(jq -r '.maximum_ram // "4G"' "$CONFIG_FILE")
+MAX_DRAW_DISTANCE=$(jq -r '.maximum_draw_distance // 10' "$CONFIG_FILE")
+
+echo "Configured RAM: $MIN_RAM (Min) / $MAX_RAM (Max)"
+echo "Configured Maximum Draw Distance: $MAX_DRAW_DISTANCE"
+
 # Server Root Directory
 SERVER_DIR="./server-instance"
 rm -rf "$SERVER_DIR"
@@ -308,6 +331,8 @@ spawn-animals=false
 spawn-monsters=false
 spawn-npcs=false
 enforce-secure-profile=false
+view-distance=$MAX_DRAW_DISTANCE
+simulation-distance=$MAX_DRAW_DISTANCE
 EOF
 
 # commands.yml (/spawn → /mvtp to main world)
@@ -945,7 +970,7 @@ cd "$SERVER_DIR"
 rm -rf plugins/.paper-remapped
 
 # Start server
-java -XX:+UseG1GC \
+java -Xms"$MIN_RAM" -Xmx"$MAX_RAM" -XX:+UseG1GC \
  -XX:+ParallelRefProcEnabled \
  -XX:MaxGCPauseMillis=200 \
  -XX:+UnlockExperimentalVMOptions \

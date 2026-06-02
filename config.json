@@ -1,0 +1,5 @@
+{
+  "minimum_ram": "1G",
+  "maximum_ram": "2G",
+  "maximum_draw_distance": 3
+}

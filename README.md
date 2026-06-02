@@ -21,6 +21,22 @@ A PaperMC server automator that builds a fresh, locked-down read-only Minecraft 
 
 If the file doesn't exist, the script downloads the latest versions and generates it automatically.
 
+## Configuration File (`config.json`)
+
+You can configure memory allocations and maximum draw distance by editing the `config.json` file in the root directory. If this file does not exist, it will be automatically created with default values:
+
+```json
+{
+  "minimum_ram": "2G",
+  "maximum_ram": "4G",
+  "maximum_draw_distance": 10
+}
+```
+
+- **`minimum_ram`**: Sets the minimum JVM memory allocation (maps to `-Xms`).
+- **`maximum_ram`**: Sets the maximum JVM memory allocation (maps to `-Xmx`).
+- **`maximum_draw_distance`**: Sets the default view distance and simulation distance within `server.properties`.
+
 ## Configuration
 
 All server behavior is configured through the script — no manual editing of server files needed:
@@ -40,6 +56,7 @@ All server behavior is configured through the script — no manual editing of se
 ```
 ./
 ├── setup_and_run.sh         # the script
+├── config.json              # server RAM and draw distance configs (editable)
 ├── version_control.json     # pinned versions (auto-generated, editable)
 ├── server-icon.png          # optional, copied into instance
 ├── worlds/                  # world directories with level.dat
