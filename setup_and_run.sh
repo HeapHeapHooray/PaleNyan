@@ -342,6 +342,14 @@ ignore-vanilla-permissions: false
 aliases:
   spawn:
   - mvtp $MAIN_WORLD
+  tp:
+  - minecraft:teleport @s \$1-
+  teleport:
+  - minecraft:teleport @s \$1-
+  minecraft:tp:
+  - minecraft:teleport @s \$1-
+  minecraft:teleport:
+  - minecraft:teleport @s \$1-
 EOF
 
 # bukkit.yml (Disable global autosave)
