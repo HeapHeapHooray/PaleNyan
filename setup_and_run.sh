@@ -376,6 +376,9 @@ ticks-per:
   axolotl-spawns: 1
   ambient-spawns: 15
   autosave: 0
+chunk-gc:
+  period-in-ticks: 300
+  load-threshold: 0
 EOF
 
 # ------------------------------------------------------------------------------
@@ -815,6 +818,9 @@ for world in "${DETECTED_WORLDS[@]}"; do
         COMMANDS_CONTENT="${COMMANDS_CONTENT}  \"execute in $execute_ns run gamerule showDeathMessages false\":\n"
         COMMANDS_CONTENT="${COMMANDS_CONTENT}    delay: 1\n"
         COMMANDS_CONTENT="${COMMANDS_CONTENT}    notify-on-exec: false\n"
+        COMMANDS_CONTENT="${COMMANDS_CONTENT}  \"execute in $execute_ns run gamerule spawnChunkRadius 0\":\n"
+        COMMANDS_CONTENT="${COMMANDS_CONTENT}    delay: 1\n"
+        COMMANDS_CONTENT="${COMMANDS_CONTENT}    notify-on-exec: false\n"
     fi
 
     COMMANDS_CONTENT="${COMMANDS_CONTENT}  \"mvm $world set gamemode creative\":\n"
@@ -857,15 +863,15 @@ block-updates:
   disable-tripwire-updates: false
 chunk-loading-advanced:
   auto-config-send-distance: true
-  player-max-concurrent-chunk-generates: 0
-  player-max-concurrent-chunk-loads: 0
+  player-max-concurrent-chunk-generates: 2
+  player-max-concurrent-chunk-loads: 4
 chunk-loading-basic:
-  player-max-chunk-generate-rate: -1.0
-  player-max-chunk-load-rate: 100.0
-  player-max-chunk-send-rate: 75.0
+  player-max-chunk-generate-rate: 4.0
+  player-max-chunk-load-rate: 16.0
+  player-max-chunk-send-rate: 16.0
 chunk-system:
-  io-threads: -1
-  worker-threads: -1
+  io-threads: 1
+  worker-threads: 1
 collisions:
   enable-player-collisions: true
   send-full-pos-for-hard-colliding-entities: true
