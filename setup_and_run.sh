@@ -337,15 +337,13 @@ level-type=minecraft:flat
 generator-settings={"biome":"minecraft:the_void","layers":[{"block":"minecraft:air","height":1}]}
 EOF
 
-# commands.yml (/spawn → /mvtp to main world, and tp override)
+# commands.yml (/spawn → /mvtp to main world)
 cat << EOF > "$SERVER_DIR/commands.yml"
 command-block-overrides: []
 ignore-vanilla-permissions: false
 aliases:
   spawn:
   - mvtp $MAIN_WORLD
-  tp:
-  - teleport \$1-
 EOF
 
 # bukkit.yml (Disable global autosave)
@@ -771,74 +769,6 @@ auto-clean-invalid-config-values: true
 config-version: 7
 EOF
 
-# Pure Bash function to calculate world border center and size from region files
-get_world_border() {
-    local world_dir=$1
-    local region_dir="$world_dir/region"
-    
-    # Also support nether and end subdirectories
-    if [ ! -d "$region_dir" ]; then
-        if [ -d "$world_dir/DIM-1/region" ]; then
-            region_dir="$world_dir/DIM-1/region"
-        elif [ -d "$world_dir/DIM1/region" ]; then
-            region_dir="$world_dir/DIM1/region"
-        else
-            echo ""
-            return
-        fi
-    fi
-    
-    local min_x=999999
-    local max_x=-999999
-    local min_z=999999
-    local max_z=-999999
-    local found=0
-    
-    # Loop over .mca and .mcr files
-    for f in "$region_dir"/r.*.*.mca "$region_dir"/r.*.*.mcr; do
-        [ -e "$f" ] || continue
-        local filename=$(basename "$f")
-        # Filename format: r.X.Z.mca or r.X.Z.mcr
-        IFS='.' read -ra ADDR <<< "$filename"
-        local rx="${ADDR[1]}"
-        local rz="${ADDR[2]}"
-        
-        if [[ "$rx" =~ ^-?[0-9]+$ ]] && [[ "$rz" =~ ^-?[0-9]+$ ]]; then
-            found=1
-            (( rx < min_x )) && min_x=$rx
-            (( rx > max_x )) && max_x=$rx
-            (( rz < min_z )) && min_z=$rz
-            (( rz > max_z )) && max_z=$rz
-        fi
-    done
-    
-    if [ $found -eq 0 ]; then
-        echo ""
-        return
-    fi
-    
-    local min_block_x=$(( min_x * 512 ))
-    local max_block_x=$(( (max_x + 1) * 512 ))
-    local min_block_z=$(( min_z * 512 ))
-    local max_block_z=$(( (max_z + 1) * 512 ))
-    
-    local center_x=$(( (min_block_x + max_block_x) / 2 ))
-    local center_z=$(( (min_block_z + max_block_z) / 2 ))
-    
-    local size_x=$(( max_block_x - min_block_x ))
-    local size_z=$(( max_block_z - min_block_z ))
-    
-    local size=$size_x
-    if (( size_z > size_x )); then
-        size=$size_z
-    fi
-    
-    # Add 32 blocks padding
-    size=$(( size + 32 ))
-    
-    echo "$center_x $center_z $size"
-}
-
 # ------------------------------------------------------------------------------
 # 6. StartupCommands Config (replaces FIFO-based delayed commands)
 # ------------------------------------------------------------------------------
@@ -892,20 +822,7 @@ for world in "${DETECTED_WORLDS[@]}"; do
     COMMANDS_CONTENT="${COMMANDS_CONTENT}    delay: 2\n"
     COMMANDS_CONTENT="${COMMANDS_CONTENT}    notify-on-exec: false\n"
 
-    # Calculate world border center and size dynamically from region files
-    border_info=$(get_world_border "$SERVER_DIR/$world")
-    if [ -n "$border_info" ]; then
-        read -r bc_x bc_z b_size <<< "$border_info"
-        echo "Dynamically setting world border for $world ($execute_ns) at center $bc_x, $bc_z with size $b_size..."
-        
-        COMMANDS_CONTENT="${COMMANDS_CONTENT}  \"execute in $execute_ns run worldborder center $bc_x $bc_z\":\n"
-        COMMANDS_CONTENT="${COMMANDS_CONTENT}    delay: 2\n"
-        COMMANDS_CONTENT="${COMMANDS_CONTENT}    notify-on-exec: false\n"
-        
-        COMMANDS_CONTENT="${COMMANDS_CONTENT}  \"execute in $execute_ns run worldborder set $b_size\":\n"
-        COMMANDS_CONTENT="${COMMANDS_CONTENT}    delay: 2\n"
-        COMMANDS_CONTENT="${COMMANDS_CONTENT}    notify-on-exec: false\n"
-    fi
+
 
     COMMANDS_CONTENT="${COMMANDS_CONTENT}  \"mvm $world set gamemode creative\":\n"
     COMMANDS_CONTENT="${COMMANDS_CONTENT}    delay: 3\n"
