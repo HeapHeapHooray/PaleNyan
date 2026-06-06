@@ -953,12 +953,12 @@ block-updates:
   disable-tripwire-updates: false
 chunk-loading-advanced:
   auto-config-send-distance: true
-  player-max-concurrent-chunk-generates: 2
-  player-max-concurrent-chunk-loads: 4
+  player-max-concurrent-chunk-generates: 4
+  player-max-concurrent-chunk-loads: 8
 chunk-loading-basic:
-  player-max-chunk-generate-rate: 4.0
-  player-max-chunk-load-rate: 16.0
-  player-max-chunk-send-rate: 16.0
+  player-max-chunk-generate-rate: -1.0
+  player-max-chunk-load-rate: -1.0
+  player-max-chunk-send-rate: -1.0
 collisions:
   enable-player-collisions: true
   send-full-pos-for-hard-colliding-entities: true
