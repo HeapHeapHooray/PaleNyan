@@ -404,6 +404,10 @@ permissions:
       value: true
   - 'multiverse.teleport.self.*':
       value: true
+  - 'multiverse.teleport.other':
+      value: true
+  - 'multiverse.teleport.other.*':
+      value: true
   - 'multiverse.core.list.worlds':
       value: true
   - 'mv.bypass.gamemode.*':
