@@ -333,11 +333,11 @@ spawn-npcs=false
 enforce-secure-profile=false
 view-distance=$MAX_DRAW_DISTANCE
 simulation-distance=$MAX_DRAW_DISTANCE
-level-type=minecraft\\:flat
-generator-settings={"biome"\\:"minecraft\\:the_void","layers"\\:[{"block"\\:"minecraft\\:air","height"\\:1}]}
+level-type=minecraft:flat
+generator-settings={"biome":"minecraft:the_void","layers":[{"block":"minecraft:air","height":1}]}
 EOF
 
-# commands.yml (/spawn → /mvtp to main world)
+# commands.yml (/spawn → /mvtp to main world, and tp override)
 cat << EOF > "$SERVER_DIR/commands.yml"
 command-block-overrides: []
 ignore-vanilla-permissions: false
@@ -345,13 +345,7 @@ aliases:
   spawn:
   - mvtp $MAIN_WORLD
   tp:
-  - minecraft:teleport @s \$1-
-  teleport:
-  - minecraft:teleport @s \$1-
-  minecraft:tp:
-  - minecraft:teleport @s \$1-
-  minecraft:teleport:
-  - minecraft:teleport @s \$1-
+  - teleport \$1-
 EOF
 
 # bukkit.yml (Disable global autosave)
