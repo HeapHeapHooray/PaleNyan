@@ -5,11 +5,20 @@ A PaperMC server automator that builds a fresh, locked-down read-only Minecraft 
 ## How it works
 
 1. **`setup_and_run.sh`** — the only file that matters
-2. Wipes `./server-instance/` and rebuilds it from scratch
+2. Wipes `./server-instance/` and rebuilds it from scratch (unless run-only mode is used)
 3. Copies worlds from `./worlds/` and a server icon from `./server-icon.png`
 4. Downloads PaperMC + plugins (versions pinned in `version_control.json`)
 5. Generates all config files — WorldGuard, LuckPerms, Multiverse-Core, MuseumWorld, StartupCommands, Geyser-Spigot
 6. Starts the server with Aikar's flags
+
+## Command-Line Options
+
+You can customize the execution of the script using the following command-line flags:
+
+- `--run-only` (aliases: `--run`, `-r`, `--no-setup`):
+  Skips the entire setup phase (does not wipe `./server-instance`, copy worlds, or download files) and immediately runs the existing Paper server.
+- `--max-tick-time <value>` (e.g., `--max-tick-time 60000` or `--max-tick-time=-1`):
+  Patches the `max-tick-time` property in `server.properties` with the provided value right before starting the server. This works with or without `--run-only`.
 
 ## Version pinning
 
@@ -63,7 +72,7 @@ All server behavior is configured through the script — no manual editing of se
 │   ├── world/
 │   ├── world_nether/
 │   └── ...
-└── server-instance/         # created and wiped each run
+└── server-instance/         # created and wiped each run (preserved in run-only mode)
 ```
 
 ## Requirements

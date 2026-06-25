@@ -38,6 +38,95 @@ echo "Configured Maximum Draw Distance: $MAX_DRAW_DISTANCE"
 
 # Server Root Directory
 SERVER_DIR="./server-instance"
+
+# Check arguments
+RUN_ONLY=false
+MAX_TICK_TIME=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --run-only|--run|-r|--no-setup)
+            RUN_ONLY=true
+            shift
+            ;;
+        --max-tick-time)
+            if [[ -n "$2" ]]; then
+                MAX_TICK_TIME="$2"
+                shift 2
+            else
+                echo "Error: --max-tick-time requires a value."
+                exit 1
+            fi
+            ;;
+        --max-tick-time=*)
+            MAX_TICK_TIME="${1#*=}"
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            shift
+            ;;
+    esac
+done
+
+patch_max_tick_time() {
+    local prop_file="$1"
+    local value="$2"
+    if [ -f "$prop_file" ]; then
+        if grep -q "^max-tick-time=" "$prop_file"; then
+            sed -i "s/^max-tick-time=.*/max-tick-time=$value/" "$prop_file"
+        else
+            echo "max-tick-time=$value" >> "$prop_file"
+        fi
+        echo "Patched max-tick-time=$value in $prop_file"
+    else
+        echo "Warning: $prop_file not found, creating one with max-tick-time=$value"
+        echo "max-tick-time=$value" > "$prop_file"
+    fi
+}
+
+if [ "$RUN_ONLY" = true ]; then
+    if [ -d "$SERVER_DIR" ]; then
+        JAR_NAME=$(find "$SERVER_DIR" -maxdepth 1 -name "paper-*.jar" | head -n 1)
+        if [ -n "$JAR_NAME" ]; then
+            JAR_NAME=$(basename "$JAR_NAME")
+            echo "Running existing Paper server ($JAR_NAME) without setup..."
+            if [ -n "$MAX_TICK_TIME" ]; then
+                patch_max_tick_time "$SERVER_DIR/server.properties" "$MAX_TICK_TIME"
+            fi
+            # Change to server instance directory so Paper creates/loads files in the right place
+            cd "$SERVER_DIR"
+            # Clear Paper remap cache to avoid stale directory/jar conflicts
+            rm -rf plugins/.paper-remapped
+            # Start server
+            exec java -Xms"$MIN_RAM" -Xmx"$MAX_RAM" -XX:+UseG1GC \
+             -XX:+ParallelRefProcEnabled \
+             -XX:MaxGCPauseMillis=200 \
+             -XX:+UnlockExperimentalVMOptions \
+             -XX:+DisableExplicitGC \
+             -XX:+AlwaysPreTouch \
+             -XX:G1NewSizePercent=30 \
+             -XX:G1MaxNewSizePercent=40 \
+             -XX:G1HeapRegionSize=8M \
+             -XX:G1ReservePercent=20 \
+             -XX:InitiatingHeapOccupancyPercent=15 \
+             -XX:SurvivorRatio=32 \
+             -XX:+PerfDisableSharedMem \
+             -XX:MaxTenuringThreshold=1 \
+             -Dusing.aikars.flags=https://mcflags.emc.gs \
+             -Daikars.new.flags=true \
+             -DGeyser.PrintSecureChatInformation=false \
+             -jar "$JAR_NAME" nogui
+        else
+            echo "Error: No Paper jar found in $SERVER_DIR. Please run setup first."
+            exit 1
+        fi
+    else
+        echo "Error: Server directory $SERVER_DIR does not exist. Please run setup first."
+        exit 1
+    fi
+fi
+
 rm -rf "$SERVER_DIR"
 mkdir -p "$SERVER_DIR"
 
@@ -978,6 +1067,10 @@ echo "=========================================================="
  echo " Config Seeding Complete!                                 "
 echo " Starting Paper server with optimized flags... "
 echo "=========================================================="
+
+if [ -n "$MAX_TICK_TIME" ]; then
+    patch_max_tick_time "$SERVER_DIR/server.properties" "$MAX_TICK_TIME"
+fi
 
 # Change to server instance directory so Paper creates files in the right place
 cd "$SERVER_DIR"
