@@ -17,6 +17,8 @@ You can customize the execution of the script using the following command-line f
 
 - `--run-only` (aliases: `--run`, `-r`, `--no-setup`):
   Skips the entire setup phase (does not wipe `./server-instance`, copy worlds, or download files) and immediately runs the existing Paper server.
+- `--setup-only` (aliases: `--no-run`, `-s`):
+  Runs the full setup phase (wipes the directory, copies worlds, downloads components, generates configs), but exits without starting the server.
 - `--max-tick-time <value>` (e.g., `--max-tick-time 60000` or `--max-tick-time=-1`):
   Patches the `max-tick-time` property in `server.properties` with the provided value right before starting the server. This works with or without `--run-only`.
 

@@ -41,12 +41,17 @@ SERVER_DIR="./server-instance"
 
 # Check arguments
 RUN_ONLY=false
+SETUP_ONLY=false
 MAX_TICK_TIME=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --run-only|--run|-r|--no-setup)
             RUN_ONLY=true
+            shift
+            ;;
+        --setup-only|--no-run|-s)
+            SETUP_ONLY=true
             shift
             ;;
         --max-tick-time)
@@ -68,6 +73,11 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+if [ "$RUN_ONLY" = true ] && [ "$SETUP_ONLY" = true ]; then
+    echo "Error: --run-only and --setup-only are mutually exclusive."
+    exit 1
+fi
 
 patch_max_tick_time() {
     local prop_file="$1"
@@ -1070,6 +1080,13 @@ echo "=========================================================="
 
 if [ -n "$MAX_TICK_TIME" ]; then
     patch_max_tick_time "$SERVER_DIR/server.properties" "$MAX_TICK_TIME"
+fi
+
+if [ "$SETUP_ONLY" = true ]; then
+    echo "=========================================================="
+    echo " Setup Complete! (--setup-only specified, not starting)   "
+    echo "=========================================================="
+    exit 0
 fi
 
 # Change to server instance directory so Paper creates files in the right place
