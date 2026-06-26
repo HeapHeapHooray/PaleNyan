@@ -600,6 +600,7 @@ regions:
         priority: 0
         flags:
             passthrough: deny
+            greeting: 'Welcome to %world%! You can type /mvtp to teleport to different worlds, use /gamemode to change gamemode, type /help to see more commands'
             build: deny             # Blocks ALL block edits, including WorldEdit
             use: allow              # Allowed so players can open doors/gates (MuseumWorld blocks levers/buttons)
             chest-access: allow     # Allowed so players can VIEW contents (Plugin will block EDITS)
