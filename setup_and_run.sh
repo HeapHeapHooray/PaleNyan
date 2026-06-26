@@ -379,6 +379,7 @@ else
     download_modrinth "P1OZGk5p" "ViaVersion"
     download_geysermc "geyser" "Geyser-Spigot"
     download_geysermc "floodgate" "Floodgate"
+    download_modrinth "simple-welcome-message" "Simple-Welcome-Message"
 
     LP_VER=$(curl -s "https://api.modrinth.com/v2/project/luckperms/version" | jq -r '[.[] | select(.loaders | index("bukkit") or index("paper"))][0].version_number')
     WE_VER=$(curl -s "https://api.modrinth.com/v2/project/worldedit/version" | jq -r '[.[] | select(.loaders | index("bukkit") or index("paper"))][0].version_number')
@@ -389,6 +390,7 @@ else
     VV_VER=$(curl -s "https://api.modrinth.com/v2/project/P1OZGk5p/version" | jq -r '[.[] | select(.loaders | index("paper"))][0].version_number')
     GEYSER_VER=$(curl -s "https://download.geysermc.org/v2/projects/geyser" | jq -r '.versions[-1]')
     FLOODGATE_VER=$(curl -s "https://download.geysermc.org/v2/projects/floodgate" | jq -r '.versions[-1]')
+    SWM_VER=$(curl -s "https://api.modrinth.com/v2/project/simple-welcome-message/version" | jq -r '[.[] | select(.loaders | index("bukkit") or index("paper"))][0].version_number')
 
     cat << EOF > "$PLUGIN_MANIFEST"
 [
@@ -401,7 +403,8 @@ else
   {"source": "github", "repo": "mattgd/StartupCommands", "name": "StartupCommands", "version": "$SC_VER"},
   {"source": "modrinth", "project": "P1OZGk5p", "name": "ViaVersion", "version": "$VV_VER"},
   {"source": "geysermc", "project": "geyser", "name": "Geyser-Spigot", "version": "$GEYSER_VER"},
-  {"source": "geysermc", "project": "floodgate", "name": "Floodgate", "version": "$FLOODGATE_VER"}
+  {"source": "geysermc", "project": "floodgate", "name": "Floodgate", "version": "$FLOODGATE_VER"},
+  {"source": "modrinth", "project": "simple-welcome-message", "name": "Simple-Welcome-Message", "version": "$SWM_VER"}
 ]
 EOF
     echo "$PLUGIN_MANIFEST generated with pinned versions."
@@ -600,7 +603,7 @@ regions:
         priority: 0
         flags:
             passthrough: deny
-            greeting: 'Welcome to %world%! You can type /mvtp to teleport to different worlds, use /gamemode to change gamemode, type /help to see more commands'
+            greeting: 'Welcome to %world%!'
             build: deny             # Blocks ALL block edits, including WorldEdit
             use: allow              # Allowed so players can open doors/gates (MuseumWorld blocks levers/buttons)
             chest-access: allow     # Allowed so players can VIEW contents (Plugin will block EDITS)
@@ -979,6 +982,15 @@ COMMANDS_CONTENT="${COMMANDS_CONTENT}    delay: 5\n"
 COMMANDS_CONTENT="${COMMANDS_CONTENT}    notify-on-exec: false\n"
 
 printf "$COMMANDS_CONTENT" > "$SERVER_DIR/plugins/StartupCommands/config.yml"
+
+# ------------------------------------------------------------------------------
+# 6.5. welcomeMessage Configuration
+# ------------------------------------------------------------------------------
+echo "Seeding welcomeMessage configuration..."
+mkdir -p "$SERVER_DIR/plugins/welcomeMessage"
+cat << 'EOF' > "$SERVER_DIR/plugins/welcomeMessage/config.yml"
+welcome-message: "&eWelcome to the server, &a%player%&e! You can type &b/mvtp&e to teleport to different worlds, use &b/gamemode&e to change gamemode, or type &b/help&e to see more commands."
+EOF
 
 # ------------------------------------------------------------------------------
 # 7. Paper Global Config (disable nether generation)

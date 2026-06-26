@@ -8,5 +8,6 @@
   {"source": "github", "repo": "mattgd/StartupCommands", "name": "StartupCommands", "version": "v0.0.6"},
   {"source": "modrinth", "project": "P1OZGk5p", "name": "ViaVersion", "version": "5.9.2-SNAPSHOT+997"},
   {"source": "geysermc", "project": "geyser", "name": "Geyser-Spigot", "version": "2.10.0"},
-  {"source": "geysermc", "project": "floodgate", "name": "Floodgate", "version": "2.2.5"}
+  {"source": "geysermc", "project": "floodgate", "name": "Floodgate", "version": "2.2.5"},
+  {"source": "modrinth", "project": "simple-welcome-message", "name": "Simple-Welcome-Message", "version": "1.0"}
 ]
