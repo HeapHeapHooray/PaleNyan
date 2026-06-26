@@ -43,6 +43,7 @@ SERVER_DIR="./server-instance"
 RUN_ONLY=false
 SETUP_ONLY=false
 MAX_TICK_TIME=""
+TIMEOUT_TIME=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -65,6 +66,19 @@ while [[ $# -gt 0 ]]; do
             ;;
         --max-tick-time=*)
             MAX_TICK_TIME="${1#*=}"
+            shift
+            ;;
+        --timeout-time)
+            if [[ -n "$2" ]]; then
+                TIMEOUT_TIME="$2"
+                shift 2
+            else
+                echo "Error: --timeout-time requires a value."
+                exit 1
+            fi
+            ;;
+        --timeout-time=*)
+            TIMEOUT_TIME="${1#*=}"
             shift
             ;;
         *)
@@ -95,6 +109,30 @@ patch_max_tick_time() {
     fi
 }
 
+patch_spigot_timeout() {
+    local prop_file="$1"
+    local value="$2"
+    if [ -f "$prop_file" ]; then
+        if grep -q "timeout-time:" "$prop_file"; then
+            sed -i "s/\(^[[:space:]]*timeout-time:\).*/\1 $value/" "$prop_file"
+        else
+            if grep -q "^settings:" "$prop_file"; then
+                sed -i "/^settings:/a \  timeout-time: $value" "$prop_file"
+            else
+                echo -e "settings:\n  timeout-time: $value" >> "$prop_file"
+            fi
+        fi
+        echo "Patched timeout-time=$value in $prop_file"
+    else
+        echo "Creating $prop_file with timeout-time=$value"
+        mkdir -p "$(dirname "$prop_file")"
+        cat << EOF > "$prop_file"
+settings:
+  timeout-time: $value
+EOF
+    fi
+}
+
 if [ "$RUN_ONLY" = true ]; then
     if [ -d "$SERVER_DIR" ]; then
         JAR_NAME=$(find "$SERVER_DIR" -maxdepth 1 -name "paper-*.jar" | head -n 1)
@@ -103,6 +141,9 @@ if [ "$RUN_ONLY" = true ]; then
             echo "Running existing Paper server ($JAR_NAME) without setup..."
             if [ -n "$MAX_TICK_TIME" ]; then
                 patch_max_tick_time "$SERVER_DIR/server.properties" "$MAX_TICK_TIME"
+            fi
+            if [ -n "$TIMEOUT_TIME" ]; then
+                patch_spigot_timeout "$SERVER_DIR/spigot.yml" "$TIMEOUT_TIME"
             fi
             # Change to server instance directory so Paper creates/loads files in the right place
             cd "$SERVER_DIR"
@@ -1080,6 +1121,10 @@ echo "=========================================================="
 
 if [ -n "$MAX_TICK_TIME" ]; then
     patch_max_tick_time "$SERVER_DIR/server.properties" "$MAX_TICK_TIME"
+fi
+
+if [ -n "$TIMEOUT_TIME" ]; then
+    patch_spigot_timeout "$SERVER_DIR/spigot.yml" "$TIMEOUT_TIME"
 fi
 
 if [ "$SETUP_ONLY" = true ]; then
